@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!-- Here ng-app is specifying what angualr app is being used.  -->
+<html ng-app="cardViewer">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <!-- Bringing in our CSS stylesheet -->
+    <link rel="stylesheet" href="style/main.css">
+  </head>
+  <!-- ng-controller is listing what controller our html has access to -->
+  <body ng-controller="listCtrl">
+
+    <span style="font-size:3em;">
+      <!-- The {{ }} is used to pull information off of our controller and put
+            it into our html.  When this -->
+      {{ name }}
+    </span>
+    <div class="filters">
+      <!-- ng-model connects an input element to our $scope from our controller.
+            In this case we are tying the text field to the basicFilter property
+            on our controlelr.  So when we change our basicFilter it will go and
+            refresh any places that are using the basicFilter in the html. -->
+      Filter: <input type ="text" ng-model="basicFilter" class="filter"/>
+    </div>
+    <!-- ng-click allows us to run some javascript when we click on the element
+          it is attached to.  In this case we are setting a variable on our $scope
+          named addingNewPokemon to true.
+
+          ng-hide will hide an element when it evaluates to a truthy value.
+          In this case ng-hide will hide our button when addingNewPokemon is true
+          As clicking on our button sets addingNewPokemon to true.  Clicking this
+          button will hide our element
+        -->
+    <button ng-click="addingNewPokemon = true" ng-hide="addingNewPokemon">Add New Cards</button>
+    <!-- ng-show is the opposite of ng-hide.  It will show the element attached
+          only if the value attached is true.
+          in this case, if addingNewPokemon is true we will show this div.
+          addingNewPokemon starts out falsey, so it will not show till we click the
+          Add New Cards button above. -->
+    <div class="addNew" ng-show="addingNewPokemon">
+      <div>
+        <!-- ng-model can attach to properties of objects in addition to just a
+              variable on scope.
+              In this case we have attached several inputs to the newPokemon object
+              on $scope.  name, type, url, as well as a stats object with hp, atk and def
+            -->
+        <span class="stat-label" > Name:</span>
+        <input ng-model="newPokemon.name" type="text" name="" value="">
+
+        <span class="stat-label" > Types:</span>
+        <input ng-model="newPokemon.type" type="text" name="" value="">
+
+        <span class="stat-label" > Image:</span>
+        <select ng-model="newPokemon.url" ng-options="image.url as image.name for image in images"> </select>
+
+        <span class="stat-label" > HP:</span>
+        <input ng-model="newPokemon.stats.hp" type="text" name="" value="">
+
+        <span class="stat-label" > ATK:</span>
+        <input ng-model="newPokemon.stats.atk" type="text" name="" value="">
+
+        <span class="stat-label" > DEF:</span>
+        <input ng-model="newPokemon.stats.def" type="text" name="" value="">
+
+        </br>
+        <!-- more ng-clicks the first one is grabbing our addNewPokemon function from $scope
+              and pass in the newPokemon object into it.
+            The second sets addingNewPokemon to false, which will close this form.
+          -->
+        <button ng-click="addNewPokemon(newPokemon)">Add New pokemon</button>
+        <button ng-click="addingNewPokemon = false">Close Form</button>
+      </div>
+      <div>
+        <!-- This is the live-preview of the card we want to add to our array. -->
+        <div class="card">
+          <div class="name"> {{ newPokemon.name }}</div>
+          <!-- ng-style lets us set styles to an element.  This syntax takes an object
+                with the styles that we want to use.
+
+                Notice that we use backgroundImage in our object instead of background-image
+                This is because javascript properties can't have -'s in them.
+                Unless we use quoted property names, though camelCase tends to
+                be a bit easier to work with.
+               -->
+          <div class="picture" ng-style='{backgroundImage:"url(" + newPokemon.url + ")"}'></div>
+          <div class="stats">
+            <!-- Here we are using the {{ }} to again grab information off our scope
+                 This time we are looking at the newPokemon being created and
+                pulling off the HP ATK and DEF we get from the input boxes above.-->
+            <div class="stat"> HP: {{newPokemon.stats.hp}} </div>
+            <div class="stat"> ATK: {{newPokemon.stats.atk}} </div>
+            <div class="stat"> DEF: {{newPokemon.stats.def}} </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cardList">
+      <!-- ng-repeat lets us repeat a part of our html multiple times.  Once for
+            each item in an array. Similar to how in react we could map over an
+            array inside of a reducer.
+
+            ng-repeat="card in cards"
+          In angular we specify the variable name we want to use for each individual
+          itteration, in this case it will be a single `card` we then specify which
+          array or objevt we want to be looping over.  In this case our array of
+          `cards`
+
+        ng-repeat also lets us attach a filter to our repeat.  The | (pipe) is
+        letting us apply a function prior to handing it to the ng-repeat.
+         ng-repeat = "... | filter:basicFilter"
+        filter is the name of the built in filter we want to use
+          (there are other built in functions, and you can create your own)
+        basicFilter is the variable that we will be using to store the filter
+        we want to use.  If basicFilter is a string. Angular will go through
+        each card in our cards array, and see if it (or a property on it) contains
+        the basicFilter. So if we filter it for 'wa' it will find any pokemon
+        that has 'wa' in any of it's values.  So if you have a pokemon named
+        'Walter' or a pokemon of type 'Water' if would pass the filter.
+
+        Instead of giving a string, we instead give it an object, it will check
+        that they have properties that match.  If basicFilter was
+        {name:'chu'} it would find all pokemon whose name contains chu, so Pikachu
+        , Raichu, Chubaka, and Chuuuuuuuuuuuu would all pass that filter.
+        -->
+      <div class="card slide" ng-repeat="card in cards | filter: basicFilter" ng-class="{selected:selected}" ng-click="selected=!selected" >
+        <div class="name"> {{ card.name }}</div>
+        <div class="picture" ng-style='{backgroundImage:"url(" + card.url + ")"}'></div>
+        <div class="stats">
+          <!-- ng-repeat can also loop over an object instead of an array.
+                It's syntax is the same as a for in loop in javascript.
+                We specify the variables to hold the key and value.  In this
+                case we named the key as stat, and value as value.  We are looping
+                over all the properties in the card's stats object. -->
+          <div class="stat" >
+            TYPE: {{card.type | uppercase }}
+          </div>
+          <div class="stat" ng-repeat ="(stat, value) in card.stats">
+            <!-- Angular has a built in uppercase function that we can run our
+                stat names through. Other such filters include lowercase,
+                currency, and date -->
+            {{stat | uppercase}}: {{value}}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script src="app/util.js" charset="utf-8"></script>
+    <script src="app/app.js" charset="utf-8"></script>
+  </body>
+</html>
